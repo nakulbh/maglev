@@ -4,18 +4,18 @@ import "time"
 
 // ReferencesModel References model for related data
 type ReferencesModel struct {
-	Agencies   []interface{} `json:"agencies"`
-	Routes     []interface{} `json:"routes"`
-	Situations []interface{} `json:"situations"`
-	StopTimes  []interface{} `json:"stopTimes"`
-	Stops      []interface{} `json:"stops"`
-	Trips      []interface{} `json:"trips"`
+	Agencies   []AgencyReference `json:"agencies"`
+	Routes     []interface{}     `json:"routes"`
+	Situations []interface{}     `json:"situations"`
+	StopTimes  []interface{}     `json:"stopTimes"`
+	Stops      []interface{}     `json:"stops"`
+	Trips      []interface{}     `json:"trips"`
 }
 
 // NewEmptyReferences creates a new empty References model with initialized empty slices
 func NewEmptyReferences() ReferencesModel {
 	return ReferencesModel{
-		Agencies:   []interface{}{},
+		Agencies:   []AgencyReference{},
 		Routes:     []interface{}{},
 		Situations: []interface{}{},
 		StopTimes:  []interface{}{},

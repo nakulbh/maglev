@@ -6,33 +6,37 @@ import (
 )
 
 func (app *application) agenciesWithCoverageHandler(w http.ResponseWriter, r *http.Request) {
-	// help fill me in.
-	// Create the agency data
-	agency := map[string]interface{}{
-		"agencyId": "unitrans",
-		"lat":      38.555308499999995,
-		"latSpan":  0.03564300000000031,
-		"lon":      -121.73599,
-		"lonSpan":  0.10499999999998977,
-	}
+	agencies := app.gtfsManager.GetAgencies()
 
-	// Create the agency reference
-	agencyRef := map[string]interface{}{
-		"disclaimer":     "",
-		"email":          "",
-		"fareUrl":        "",
-		"id":             "unitrans",
-		"lang":           "en",
-		"name":           "Unitrans",
-		"phone":          "530-752-BUSS",
-		"privateService": false,
-		"timezone":       "America/Los_Angeles",
-		"url":            "http://unitrans.ucdavis.edu",
+	agenciesWithCoverage := make([]models.AgencyCoverage, len(agencies))
+	agencyReferences := make([]models.AgencyReference, len(agencies))
+
+	for _, a := range agencies {
+		agenciesWithCoverage = append(
+			agenciesWithCoverage,
+			models.NewAgencyCoverage(a.Id, 0.0, 0.0, 0.0, 0.0),
+		)
+
+		agencyReferences = append(
+			agencyReferences,
+			models.NewAgencyReference(
+				a.Id,
+				a.Name,
+				a.Url,
+				a.Timezone,
+				a.Language,
+				a.Phone,
+				a.Email,
+				"",
+				"",
+				false,
+			),
+		)
 	}
 
 	// Create references with the agency
 	references := models.ReferencesModel{
-		Agencies:   []interface{}{agencyRef},
+		Agencies:   agencyReferences,
 		Routes:     []interface{}{},
 		Situations: []interface{}{},
 		StopTimes:  []interface{}{},
@@ -43,7 +47,7 @@ func (app *application) agenciesWithCoverageHandler(w http.ResponseWriter, r *ht
 	// Create the data structure
 	data := map[string]interface{}{
 		"limitExceeded": false,
-		"list":          []interface{}{agency},
+		"list":          agenciesWithCoverage,
 		"references":    references,
 	}
 

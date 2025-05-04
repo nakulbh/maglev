@@ -79,6 +79,10 @@ func (manager *Manager) updateGTFSPeriodically() {
 	}
 }
 
+func (manager *Manager) GetAgencies() []gtfs.Agency {
+	return manager.gtfsData.Agencies
+}
+
 func (manager *Manager) PrintStatistics() {
 	fmt.Printf("URL: %s\n", manager.gtfsURL)
 	fmt.Printf("Last Updated: %s\n", manager.lastUpdated)
