@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"maglev.onebusaway.org/internal/gtfs"
 	"net/http"
 	"os"
 	"strings"
@@ -24,14 +25,16 @@ type config struct {
 	port    int
 	env     string
 	apiKeys []string
+	gtfsURL string
 }
 
 // Define an application struct to hold the dependencies for our HTTP handlers, helpers,
 // and middleware. At the moment this only contains a copy of the config struct and a
 // logger, but it will grow to include a lot more as our build progresses.
 type application struct {
-	config config
-	logger *slog.Logger
+	config      config
+	logger      *slog.Logger
+	gtfsManager *gtfs.Manager
 }
 
 func main() {
@@ -41,6 +44,7 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.StringVar(&apiKeysFlag, "api-keys", "test", "Comma Separated API Keys (test, etc)")
+	flag.StringVar(&cfg.gtfsURL, "gtfs-url", "https://www.soundtransit.org/GTFS-rail/40_gtfs.zip", "URL for a static GTFS zip file")
 	flag.Parse()
 
 	if apiKeysFlag != "" {
@@ -52,9 +56,17 @@ func main() {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
+	gtfsManager, err := gtfs.InitGTFSManager(cfg.gtfsURL)
+	if err != nil {
+		logger.Error("failed to initialize GTFS manager", "error", err)
+	}
+
+	gtfsManager.PrintStatistics()
+
 	app := &application{
-		config: cfg,
-		logger: logger,
+		config:      cfg,
+		logger:      logger,
+		gtfsManager: gtfsManager,
 	}
 
 	// Use the httprouter instance returned by app.routes() as the server handler.
@@ -68,7 +80,7 @@ func main() {
 	}
 
 	logger.Info("starting server", "addr", srv.Addr, "env", cfg.env)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	logger.Error(err.Error())
 	os.Exit(1)
 }
