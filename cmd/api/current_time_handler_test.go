@@ -13,12 +13,13 @@ func TestCurrentTimeHandler(t *testing.T) {
 	// Create a new application instance with any configuration needed
 	app := &application{
 		config: config{
-			env: "test",
+			env:     "test",
+			apiKeys: []string{"testkey"},
 		},
 	}
 
 	// Create a new HTTP request with the correct URL path
-	req, err := http.NewRequest("GET", "/api/where/current-time.json", nil)
+	req, err := http.NewRequest("GET", "/api/where/current-time.json?key=testkey", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,5 +110,56 @@ func TestCurrentTimeHandler(t *testing.T) {
 		} else if len(array) != 0 {
 			t.Errorf("expected empty %s array, got length %d", field, len(array))
 		}
+	}
+}
+
+func TestCurrentTimeHandlerInvalidKey(t *testing.T) {
+	// Create a new application instance
+	app := &application{
+		config: config{
+			env:     "test",
+			apiKeys: []string{"valid_key"},
+		},
+	}
+
+	// Test with invalid key
+	req, err := http.NewRequest("GET", "/api/where/current-time.json?key=invalid_key", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	app.currentTimeHandler(rr, req)
+
+	// Check status code
+	if status := rr.Code; status != http.StatusUnauthorized {
+		t.Errorf("handler returned wrong status code for invalid key: got %v want %v",
+			status, http.StatusUnauthorized)
+	}
+
+	// Parse response
+	var response struct {
+		Code        int    `json:"code"`
+		CurrentTime int64  `json:"currentTime"`
+		Text        string `json:"text"`
+		Version     int    `json:"version"`
+	}
+
+	err = json.Unmarshal(rr.Body.Bytes(), &response)
+	if err != nil {
+		t.Errorf("error parsing response: %v", err)
+	}
+
+	// Check response structure
+	if response.Code != http.StatusUnauthorized {
+		t.Errorf("expected code 401, got %d", response.Code)
+	}
+
+	if response.Text != "permission denied" {
+		t.Errorf("expected text 'permission denied', got %s", response.Text)
+	}
+
+	if response.Version != 1 {
+		t.Errorf("expected version 1, got %d", response.Version)
 	}
 }

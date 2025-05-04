@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -20,8 +21,9 @@ const version = "1.0.0"
 // application (development, staging, production, etc.). We will read in these
 // configuration settings from command-line flags when the application starts.
 type config struct {
-	port int
-	env  string
+	port    int
+	env     string
+	apiKeys []string
 }
 
 // Define an application struct to hold the dependencies for our HTTP handlers, helpers,
@@ -34,10 +36,19 @@ type application struct {
 
 func main() {
 	var cfg config
+	var apiKeysFlag string
 
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	flag.StringVar(&apiKeysFlag, "api-keys", "test", "Comma Separated API Keys (test, etc)")
 	flag.Parse()
+
+	if apiKeysFlag != "" {
+		cfg.apiKeys = strings.Split(apiKeysFlag, ",")
+		for i := range cfg.apiKeys {
+			cfg.apiKeys[i] = strings.TrimSpace(cfg.apiKeys[i])
+		}
+	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 

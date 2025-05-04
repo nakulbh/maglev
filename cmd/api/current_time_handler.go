@@ -10,9 +10,12 @@ import (
 // Declare a handler which writes a JSON response with information about the
 // current time.
 func (app *application) currentTimeHandler(w http.ResponseWriter, r *http.Request) {
-	timeData := models.NewCurrentTimeData(time.Now())
+	if app.requestHasInvalidAPIKey(r) {
+		app.invalidAPIKeyResponse(w, r)
+		return
+	}
 
-	// Create the response using our helper function
+	timeData := models.NewCurrentTimeData(time.Now())
 	response := models.NewResponse(http.StatusOK, timeData, "OK")
 
 	// Set content type and write response
