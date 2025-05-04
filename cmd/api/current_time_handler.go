@@ -22,7 +22,7 @@ func (app *application) currentTimeHandler(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 }
