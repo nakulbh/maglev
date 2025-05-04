@@ -24,6 +24,11 @@ func NewEmptyReferences() ReferencesModel {
 	}
 }
 
+// NewOKResponse is a helper function that returns a successful response.
+func NewOKResponse(data interface{}) ResponseModel {
+	return NewResponse(200, data, "OK")
+}
+
 // NewResponse Helper function to create a standard response
 func NewResponse(code int, data interface{}, text string) ResponseModel {
 	return ResponseModel{

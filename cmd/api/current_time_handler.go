@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"maglev.onebusaway.org/internal/models"
 	"net/http"
 	"time"
@@ -16,13 +15,7 @@ func (app *application) currentTimeHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	timeData := models.NewCurrentTimeData(time.Now())
-	response := models.NewResponse(http.StatusOK, timeData, "OK")
+	response := models.NewOKResponse(timeData)
 
-	// Set content type and write response
-	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(response)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
+	app.sendResponse(w, r, response)
 }
