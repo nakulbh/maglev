@@ -2,6 +2,20 @@
 
 A complete rewrite of the OneBusAway (OBA) REST API server in Golang.
 
+## Basic Commands
+
+All basic commands are managed by our Makefile:
+
+`make run` - Build and run the app with a fake API key: `test`.
+
+`make build` - Build the app.
+
+`make clean` - Delete all build and coverage artifacts.
+
+`make coverage` - Test and generate HTML coverage artifacts.
+
+`make test` - Run tests.
+
 ## Directory Structure
 
 * `bin` contains compiled application binaries, ready for deployment to a production server.
